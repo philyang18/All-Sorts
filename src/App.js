@@ -8,8 +8,7 @@ class App extends React.Component {
     return (
       <Router>
         <Switch>
-          <Route path="/" exact component={SortingPage}/>
-          {/* <Route component={ErrorPage} /> */}
+          <Route path="/" component={SortingPage}/>
         </Switch>
       </Router>
     );
