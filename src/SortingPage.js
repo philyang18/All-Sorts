@@ -14,9 +14,11 @@ class SortingPage extends React.Component {
     super(props);
       this.state = {
         originalList: Array.apply(null, Array(1000)).map(function () { return Math.floor((Math.random() * 400) + 1); }),
+        unsortedList: [],
         list: [],
         sorted: false,
         updateList: false,
+        updateUnsortedList: false,
         updateHistory: false,
         showInfo: false,
         history: [],
@@ -30,14 +32,21 @@ class SortingPage extends React.Component {
       };
   }
   componentDidMount = () => {
-    this.setState({list: [...this.state.originalList]});
+    this.setState({unsortedList: [...this.state.originalList], list: [...this.state.originalList]});
   }
   componentDidUpdate = () => {
     if(this.state.history.length === 0 && this.state.counter > 0) {
       this.setState({counter: 0});
     }
     if(this.state.updateList) {
-      this.setState({updateList: false, list: [...this.state.originalList]});
+      this.setState({updateList: false, list: [...this.state.unsortedList]});
+    }
+    if(this.state.updateUnsortedList) {
+      let arr = [];
+      for(let i = 0; i < this.state.elements; ++i) {
+        arr[i] = this.state.originalList[i];
+      }
+      this.setState({updateUnsortedList: false, unsortedList: [...arr], list: arr});
     }
     if(this.state.updateHistory) {
       if(this.state.decreasingNumOrder !== undefined) {
@@ -103,6 +112,7 @@ class SortingPage extends React.Component {
       updateHistory: true
     }));
   }
+
   heapSort = () => {
     let start = performance.now();
     let newList = heapSort(this.state.list);
@@ -115,6 +125,7 @@ class SortingPage extends React.Component {
       updateHistory: true
     }));
   }
+
   quickSort = () => {
     let start = performance.now();
     let newList = quickSort(this.state.list);
@@ -172,13 +183,11 @@ class SortingPage extends React.Component {
       colorIndex: (prevState.colorIndex + 1) % this.state.colors.length
     }));
   }
-  reset = event => {
-    event.preventDefault();
-    console.log(event);
-    this.setState({showInfo: false, sorted: false, list: [...this.state.originalList]});
+  reset = () => {
+    this.setState({showInfo: false, sorted: false, updateList: true});
   }
   newOrder = () => {
-    this.setState({showInfo: false, updateList: true, sorted: false, originalList: Array.apply(null, Array(this.state.elements)).map(function () { return Math.floor((Math.random() * 400) + 1); }) });
+    this.setState({showInfo: false, updateUnsortedList: true, sorted: false, originalList: Array.apply(null, Array(1000)).map(function () { return Math.floor((Math.random() * 400) + 1); })});
   }
 
   displayInfo = () => {
@@ -194,9 +203,26 @@ class SortingPage extends React.Component {
       return curr.count !== count;
     })});
   }
-  onChange = (value) => 
+  onChange = (event, value) => 
   { 
-    this.setState({sorted: false, elements: value, updateList: true, originalList: Array.apply(null, Array(value)).map(function () { return Math.floor((Math.random() * 400) + 1); })});
+    event.preventDefault();
+    this.setState({sorted: false, elements: value, updateList: true, unsortedList: this.copyOriginal(value) });
+  }
+  copyOriginal = (length) => {
+    let arr = [...this.state.unsortedList];
+    console.log(arr);
+    if(length > arr.length) {
+      for(let i = arr.length; i < length; ++i) {
+        arr.push(this.state.originalList[i]);
+      }
+    }
+    else {
+      let diff = arr.length - length;
+      for(let i = 0; i < diff; ++i) {
+        arr.pop();
+      }
+    }
+    return arr;
   }
   toggleNumOrder = () => {
     this.setState({updateHistory: true, decreasingNumOrder: !this.state.decreasingNumOrder, ascendingMethodOrder: undefined, ascendingTimeOrder: undefined});
@@ -227,9 +253,9 @@ class SortingPage extends React.Component {
                       })}
                   </div>
               </div>
-              <div id="bar-slider" className="row col-12">
+              <div id="bar-slider" className="row col-12" style={this.state.sorted ? {visibility: "hidden"} : {visibility: "visible"}}>
                 <DiscreteSlider value={this.state.elements} onChange={this.onChange}/>
-              </div>
+              </div> 
               <div id="button-container" className="row">
                 {this.state.sorted ?
                   <div>
@@ -287,5 +313,4 @@ class SortingPage extends React.Component {
     );
   }
 }
-
 export default SortingPage;
