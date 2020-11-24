@@ -27,6 +27,7 @@ class SortingPage extends React.Component {
         colorIndex: 0,
         elements: 1000,
         decreasingNumOrder: true,
+        ascendingElementOrder: undefined,
         ascendingMethodOrder: undefined,
         ascendingTimeOrder: undefined
       };
@@ -51,6 +52,8 @@ class SortingPage extends React.Component {
     if(this.state.updateHistory) {
       if(this.state.decreasingNumOrder !== undefined) {
         this.sortByNum();
+      } else if(this.state.ascendingElementOrder !== undefined) {
+        this.sortByElements();
       } else if(this.state.ascendingMethodOrder !== undefined) {
         this.sortByMethod();
       } else if(this.state.ascendingTimeOrder !== undefined) {
@@ -73,7 +76,18 @@ class SortingPage extends React.Component {
       updateHistory: false
     });
   }
-
+  sortByElements = () => {
+    let list = [...this.state.history];
+    if(!this.state.ascendingElementOrder) {
+      list = list.sort((a, b) => b.elements - a.elements);
+    } else {
+      list = list.sort((a, b) => a.elements - b.elements);
+    }
+    this.setState({
+      history: list,
+      updateHistory: false
+    });
+  }
   sortByMethod = () => {
     let list = [...this.state.history];
     if(this.state.ascendingMethodOrder) {
@@ -105,7 +119,7 @@ class SortingPage extends React.Component {
     let newList = mergeSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "merge sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "merge sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -118,7 +132,7 @@ class SortingPage extends React.Component {
     let newList = heapSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "heap sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "heap sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -131,7 +145,7 @@ class SortingPage extends React.Component {
     let newList = quickSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "quick sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "quick sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -144,7 +158,7 @@ class SortingPage extends React.Component {
     let newList = insertionSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "insertion sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "insertion sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -157,7 +171,7 @@ class SortingPage extends React.Component {
     let newList = bubbleSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "bubble sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "bubble sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -170,7 +184,7 @@ class SortingPage extends React.Component {
     let newList = selectionSort(this.state.list);
     let end = performance.now();
     this.setState(prevState => ({
-      history: [...prevState.history, {count: this.state.counter + 1,type: "selection sort", time: end-start}],
+      history: [...prevState.history, {count: this.state.counter + 1,elements: this.state.elements,type: "selection sort", time: end-start}],
       counter: prevState.counter + 1,
       list: newList,
       sorted: true,
@@ -225,14 +239,17 @@ class SortingPage extends React.Component {
     return arr;
   }
   toggleNumOrder = () => {
-    this.setState({updateHistory: true, decreasingNumOrder: !this.state.decreasingNumOrder, ascendingMethodOrder: undefined, ascendingTimeOrder: undefined});
+    this.setState({updateHistory: true, decreasingNumOrder: !this.state.decreasingNumOrder, ascendingMethodOrder: undefined, ascendingTimeOrder: undefined, ascendingElementOrder: undefined});
     this.componentDidUpdate();
   }
+  toggleElementOrder = () => {
+    this.setState({updateHistory: true, ascendingElementOrder: !this.state.ascendingElementOrder, ascendingTimeOrder: undefined, ascendingMethodOrder: undefined, decreasingNumOrder: undefined})
+  }
   toggleMethodOrder = () => {
-    this.setState({updateHistory: true, ascendingMethodOrder: !this.state.ascendingMethodOrder, decreasingNumOrder: undefined, ascendingTimeOrder: undefined})
+    this.setState({updateHistory: true, ascendingMethodOrder: !this.state.ascendingMethodOrder, decreasingNumOrder: undefined, ascendingTimeOrder: undefined, ascendingElementOrder: undefined})
   }
   toggleTimeOrder = () => {
-    this.setState({updateHistory: true, ascendingTimeOrder: !this.state.ascendingTimeOrder, ascendingMethodOrder: undefined, decreasingNumOrder: undefined})
+    this.setState({updateHistory: true, ascendingTimeOrder: !this.state.ascendingTimeOrder, ascendingMethodOrder: undefined, decreasingNumOrder: undefined, ascendingElementOrder: undefined})
   }
   render() {
     return (
@@ -283,6 +300,10 @@ class SortingPage extends React.Component {
                       <th onClick={this.toggleNumOrder} className="unselectable">#</th> :
                       <th onClick={this.toggleNumOrder} className="unselectable"># <i  className={this.state.decreasingNumOrder ? "icon-caret-down" : "icon-caret-up"}></i></th>
                     }
+                    {this.state.ascendingElementOrder === undefined ?
+                      <th onClick={this.toggleElementOrder} className="unselectable">Elements </th> :
+                      <th onClick={this.toggleElementOrder} className="unselectable">Elements <i  className={this.state.ascendingElementOrder ? "icon-caret-up" : "icon-caret-down"}></i></th>
+                    }
                     {this.state.ascendingMethodOrder === undefined ?
                       <th onClick={this.toggleMethodOrder} className="unselectable">Sorting Algorithm</th> :
                       <th onClick={this.toggleMethodOrder} className="unselectable">Sorting Algorithm <i className={this.state.ascendingMethodOrder ? "icon-caret-up" : "icon-caret-down"}/></th>
@@ -299,6 +320,7 @@ class SortingPage extends React.Component {
                     return (
                       <tr>
                         <td><b>{curr.count}</b></td>
+                        <td>{curr.elements}</td>
                         <td>{curr.type}</td>
                         <td>{curr.time}</td>
                         <td className="text-danger delete-btn" onClick={() => {this.handleDelete(curr.count)}}>delete</td>
